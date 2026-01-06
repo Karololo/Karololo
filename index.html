@@ -1,0 +1,2954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#000">
+    <title>Klaude</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        body {
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            background-color: #000000;
+            color: #ffffff;
+            line-height: 1.8;
+            font-size: 10px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .bg-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+
+        .bg-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -2px; }
+            100% { top: 100%; }
+        }
+
+        .glitch-box {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: glitch 10s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { opacity: 0.1; transform: translate(0, 0); }
+            25% { opacity: 0.2; transform: translate(2px, -2px); }
+            50% { opacity: 0.15; transform: translate(-2px, 2px); }
+            75% { opacity: 0.2; transform: translate(2px, 2px); }
+        }
+
+        /* Header */
+        .header {
+            padding: 1.5rem 2rem 1rem 2rem;
+            border-bottom: 2px solid #ffffff;
+            background-color: #000000;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-img {
+            height: 40px;
+            width: auto;
+        }
+
+        .site-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 2px 2px 0px #000000;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: normal;
+        }
+
+        .nav-links a:hover {
+            color: #cccccc;
+            text-shadow: 1px 1px 0px #000000;
+        }
+
+        .nav-divider {
+            color: #666666;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .social-icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            filter: brightness(0) invert(1);
+            transition: opacity 0.2s;
+        }
+
+        .social-icon:hover {
+            opacity: 0.7;
+        }
+
+        .pill-icon {
+            width: 80px;
+            height: 32px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000000;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .pill-icon:hover {
+            background-color: #cccccc;
+        }
+
+        /* Whitepaper Modal */
+        .whitepaper-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            overflow-y: auto;
+        }
+
+        .whitepaper-modal.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .whitepaper-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .whitepaper-content {
+            max-width: 800px;
+            width: 100%;
+            background-color: #000000;
+            border: 2px solid #ffffff;
+            padding: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        /* Workflow Modal - same style as whitepaper */
+        .workflow-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            overflow-y: auto;
+        }
+
+        .workflow-modal.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .workflow-modal-content {
+            max-width: 1000px;
+            width: 100%;
+            background-color: #000000;
+            border: 2px solid #ffffff;
+            padding: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .workflow-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 1rem;
+        }
+
+        .workflow-modal-title {
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .workflow-modal-close {
+            background: none;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+        }
+
+        .workflow-modal-close:hover {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .workflow-modal-body {
+            color: #ffffff;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        /* Solana Analysis Modal */
+        .solana-analysis-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            overflow-y: auto;
+        }
+
+        .solana-analysis-modal.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .solana-analysis-content {
+            max-width: 900px;
+            width: 100%;
+            background-color: #1a1a1a;
+            border: 3px solid #ffffff;
+            padding: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .solana-analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 1rem;
+        }
+
+        .solana-analysis-close {
+            background: none;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+        }
+
+        .solana-analysis-close:hover {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Update whitelist modal animations */
+        .whitelist-modal.active {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .whitelist-modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .whitepaper-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 1rem;
+        }
+
+        .whitepaper-title {
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .whitepaper-close {
+            background: none;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+        }
+
+        .whitepaper-close:hover {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .whitepaper-body {
+            color: #ffffff;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .whitepaper-body p {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Whitelist Modal */
+        .whitelist-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            overflow-y: auto;
+        }
+
+        .whitelist-modal.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .whitelist-modal-content {
+            max-width: 500px;
+            width: 100%;
+            background-color: #000000;
+            border: 2px solid #ffffff;
+            padding: 2rem;
+        }
+
+        .whitelist-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 1rem;
+        }
+
+        .whitelist-modal-title {
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .whitelist-modal-close {
+            background: none;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+        }
+
+        .whitelist-modal-close:hover {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Net Worth Chart Section */
+        .networth-chart-section {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px solid #ffffff;
+            background-color: rgba(17, 17, 17, 0.8);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            color: #ffffff;
+            font-weight: normal;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        .chart-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        #networth-chart {
+            display: none;
+        }
+
+        .intro-metrics {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .profit-metrics {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #ffffff;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid #ffffff;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: #999999;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 1rem;
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .metric-value.negative {
+            color: #ff4444;
+        }
+
+        .metric-value.neutral {
+            color: #ffffff;
+        }
+
+        /* Memecoin Ticker Bar */
+        .ticker-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-top: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            background-color: #111111;
+        }
+
+        .ticker-items {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .ticker-item {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .ticker-symbol {
+            font-weight: normal;
+            color: #ffffff;
+        }
+
+        .ticker-price {
+            color: #cccccc;
+        }
+
+        .ticker-right {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: #ffffff;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #000000;
+        }
+
+        /* Left Content */
+        .main-content {
+            padding-right: 2rem;
+        }
+
+        .content-section {
+            margin-bottom: 2rem;
+        }
+
+        .content-section p {
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #ffffff;
+        }
+
+        .quote {
+            font-style: normal;
+            color: #cccccc;
+            margin: 2rem 0;
+            font-size: 1rem;
+            border-left: 4px solid #ffffff;
+            padding-left: 1rem;
+        }
+
+        .waitlist-link {
+            display: inline-block;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: normal;
+            margin-top: 1rem;
+            border: 2px solid #ffffff;
+            padding: 0.5rem 1rem;
+        }
+
+        .waitlist-link:hover {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Right Sidebar - MODELCHAT */
+        .modelchat-sidebar {
+            border-left: 2px solid #ffffff;
+            padding-left: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-weight: normal;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .filter-dropdown {
+            font-size: 0.85rem;
+            color: #999999;
+            cursor: pointer;
+        }
+
+        .filter-dropdown:hover {
+            color: #ffffff;
+        }
+
+        .model-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .model-message {
+            border: 2px solid #ffffff;
+            border-radius: 0;
+            padding: 1rem;
+            background-color: #111111;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .model-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .icon-blue {
+            background-color: #0000ff;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+        }
+
+        .icon-green {
+            background-color: #00ff00;
+            color: #000000;
+            border: 1px solid #ffffff;
+        }
+
+        .icon-orange {
+            background-color: #ff8800;
+            color: #000000;
+            border: 1px solid #ffffff;
+        }
+
+        .model-name {
+            font-weight: normal;
+            font-size: 0.9rem;
+            color: #ffffff;
+        }
+
+        .model-type {
+            font-size: 0.8rem;
+            color: #cccccc;
+        }
+
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: #999999;
+            margin-left: auto;
+        }
+
+        .message-content {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .expand-link {
+            font-size: 0.75rem;
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+            display: block;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .expand-link:hover {
+            color: #cccccc;
+            text-shadow: 1px 1px 0px #000000;
+        }
+
+        .model-message.collapsed .message-content {
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .model-message.collapsed .message-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, #1a1a1a);
+        }
+
+        /* Workflow Section */
+        .workflow-section {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: #000000;
+            border-top: 2px solid #ffffff;
+        }
+
+        .workflow-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .workflow-title {
+            font-size: 1.5rem;
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid #ffffff;
+            padding-bottom: 1rem;
+        }
+
+        .workflow-subtitle {
+            text-align: center;
+            color: #999999;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .workflow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .workflow-step {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            padding: 1.5rem;
+            border: 2px solid #ffffff;
+            background-color: rgba(17, 17, 17, 0.8);
+        }
+
+        .step-number {
+            font-size: 1.2rem;
+            color: #00ff00;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 1rem;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .step-description {
+            font-size: 0.85rem;
+            color: #cccccc;
+            line-height: 1.6;
+        }
+
+        .workflow-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+            border: 2px solid #ffffff;
+            background-color: rgba(17, 17, 17, 0.8);
+        }
+
+        .feature-item {
+            font-size: 0.85rem;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .feature-item strong {
+            color: #00ff00;
+        }
+
+        /* Wallet Activity Section */
+        .wallet-section {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: #000000;
+            border-top: 2px solid #ffffff;
+        }
+
+        .logs-workflow-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .logs-workflow-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .logs-terminal {
+            width: 100%;
+            border: 2px solid #ffffff;
+            background-color: #000000;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #00ff00;
+        }
+
+        .logs-terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .logs-terminal::-webkit-scrollbar-track {
+            background: #000000;
+        }
+
+        .logs-terminal::-webkit-scrollbar-thumb {
+            background: #ffffff;
+            border: 1px solid #000000;
+        }
+
+        .log-line {
+            margin-bottom: 0.25rem;
+            word-wrap: break-word;
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .wallet-tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .wallet-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: normal;
+            color: #999999;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .wallet-tab.active {
+            color: #ffffff;
+            border-bottom-color: #ffffff;
+        }
+
+        .wallet-tab:hover {
+            color: #ffffff;
+        }
+
+        .wallet-filters {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #ffffff;
+        }
+
+        .filter-checkbox input {
+            cursor: pointer;
+            accent-color: #ffffff;
+        }
+
+        .wallet-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #000000;
+            font-size: 0.85rem;
+        }
+
+        .wallet-table thead {
+            background-color: #111111;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .wallet-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: normal;
+            color: #ffffff;
+            font-size: 0.8rem;
+        }
+
+        .wallet-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #001100;
+            color: #ffffff;
+        }
+
+        .wallet-table tbody tr:hover {
+            background-color: #111111;
+        }
+
+        .token-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .token-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .token-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .token-symbol {
+            font-weight: normal;
+            color: #ffffff;
+        }
+
+        .token-time {
+            font-size: 0.75rem;
+            color: #999999;
+        }
+
+        .token-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .action-icon {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .action-icon:hover {
+            opacity: 1;
+        }
+
+        .profit-positive {
+            color: #00ff00;
+            font-weight: normal;
+            text-shadow: 1px 1px 0px #000000;
+        }
+
+        .profit-negative {
+            color: #ff0000;
+            font-weight: normal;
+            text-shadow: 1px 1px 0px #000000;
+        }
+
+        .profit-zero {
+            color: #999999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #ffffff;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #ff0000;
+            border: 2px solid #ff0000;
+            background-color: #110000;
+        }
+
+        /* Track Address Section */
+        .track-section {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: #000000;
+            border-top: 2px solid #ffffff;
+        }
+
+        .track-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .track-title {
+            font-size: 1.2rem;
+            color: #ffffff;
+        }
+
+        .track-address {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            color: #ffffff;
+            background-color: #111111;
+            padding: 0.75rem 1rem;
+            border: 2px solid #ffffff;
+            display: inline-block;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Tooltip for trade reasoning */
+        .token-symbol {
+            position: relative;
+            cursor: help;
+        }
+
+        .trade-reasoning-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 0.5rem;
+            padding: 0.75rem 1rem;
+            background-color: #1a1a1a;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-size: 0.7rem;
+            line-height: 1.6;
+            white-space: normal;
+            width: 300px;
+            z-index: 1000;
+            pointer-events: none;
+            display: none;
+        }
+
+        .token-symbol:hover .trade-reasoning-tooltip {
+            display: block;
+        }
+
+        .reasoning-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #00ff00;
+            border-bottom: 1px solid #ffffff;
+            padding-bottom: 0.25rem;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #000000;
+            border-top: 2px solid #ffffff;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .footer-logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .footer-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .footer-link:hover {
+            color: #cccccc;
+            text-shadow: 1px 1px 0px #000000;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .footer-right {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .whitelist-section {
+            border: 2px solid #ffffff;
+            padding: 1.5rem;
+            background-color: #111111;
+        }
+
+        .whitelist-title {
+            font-size: 1rem;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .whitelist-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .whitelist-input {
+            background-color: #000000;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            padding: 0.75rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+        }
+
+        .whitelist-input::placeholder {
+            color: #666666;
+        }
+
+        .whitelist-button {
+            background-color: #ffffff;
+            color: #000000;
+            border: 2px solid #ffffff;
+            padding: 0.75rem 1.5rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .whitelist-button:hover {
+            background-color: #cccccc;
+        }
+
+        .whitelist-success {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+            border: 2px solid #00ff00;
+            background-color: #001100;
+        }
+
+        .whitelist-success.active {
+            display: block;
+        }
+
+        .whitelist-success-title {
+            color: #00ff00;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .whitelist-success-text {
+            color: #ffffff;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .modelchat-sidebar {
+                border-left: none;
+                border-top: 1px solid #e5e5e5;
+                padding-left: 0;
+                padding-top: 2rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+            }
+
+            .ticker-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .wallet-table {
+                font-size: 0.75rem;
+            }
+
+            .wallet-table th,
+            .wallet-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main-layout {
+                padding: 1rem;
+            }
+
+            .ticker-items {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .index-tabs {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .wallet-section {
+                padding: 1rem;
+            }
+
+            .wallet-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .wallet-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-grid"></div>
+        <div class="bg-lines">
+            <div class="scan-line" style="animation-delay: 0s;"></div>
+            <div class="scan-line" style="animation-delay: 2s;"></div>
+            <div class="scan-line" style="animation-delay: 4s;"></div>
+            <div class="scan-line" style="animation-delay: 6s;"></div>
+        </div>
+        <div class="bg-particles" id="particles-container"></div>
+    </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="logo-section">
+                <img src="logo_transparent.png" alt="Logo" class="logo-img">
+                <h1 class="site-title">klaude.fun</h1>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">LIVE</a>
+                <span class="nav-divider">|</span>
+                <a href="#" id="whitepaper-link">WHITEPAPER</a>
+                <a href="#" id="workflow-link">WORKFLOW</a>
+            </div>
+            <div class="social-icons">
+                <a href="https://x.com/klaudefun" target="_blank" rel="noopener noreferrer">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </a>
+                <a href="https://pump.fun/ca" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: none; font-size: 0.9rem;">pump.fun</a>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- Net Worth Chart -->
+    <section class="networth-chart-section">
+        <div class="chart-header">
+                <h2 class="chart-title">TOTAL PROFIT</h2>
+            <div style="font-size: 0.8rem; color: #999999;" id="chart-last-update">Loading...</div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-loading" id="chart-loading">Loading chart data...</div>
+            <canvas id="networth-chart"></canvas>
+        </div>
+        
+        <!-- Metrics Display -->
+        <div id="profit-metrics" class="profit-metrics">        </div>
+    </section>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Content -->
+        <main class="main-content">
+            <div class="content-section">
+                <h2 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: #ffffff;">Klaude AI</h2>
+                
+                <p>
+                    Klaude is an autonomous memecoin trader that uses Claude exclusively to decide whether a memecoin is worth buying.
+                </p>
+                <p>
+                    It uses all creator fees to execute trades via the Pump Portal API. By combining smart money behavior, wallet flows, volume dynamics, and holder structure—with off-chain signals including social traction and narrative.
+                </p>
+                <p>
+                    It is a self-operating trader designed to adapt and execute in real time.
+                </p>
+
+                <!-- Metrics Display -->
+                <div id="intro-metrics" class="intro-metrics"></div>
+
+            </div>
+        </main>
+
+        <!-- Right Sidebar - MODELCHAT -->
+        <aside class="modelchat-sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">MODELCHAT</h2>
+            </div>
+            <div class="model-messages">
+                <!-- Solana Analysis -->
+                <div class="model-message collapsed" id="model-message-1" style="border: 3px solid #ffffff; background-color: #1a1a1a;">
+                    <div class="message-header">
+                        <div class="model-icon icon-orange">✱</div>
+                        <div>
+                            <div class="model-name">CLAUDE-SONNET-4-5</div>
+                            <div class="model-type">Solana Analysis</div>
+                        </div>
+                        <div class="message-timestamp">NOW</div>
+                    </div>
+                    <div class="message-content" style="font-size: 0.85rem; line-height: 1.8;">
+                        <strong style="color: #ffffff; display: block; margin-bottom: 0.5rem;">Market Commentary and Levels:</strong>
+                        <br>
+                        <strong>Current Price:</strong> SOL trading at $138.07, showing +3.99% gain. Strong upward momentum detected.<br><br>
+                        <strong>Market Structure:</strong> Price broke out of consolidation zone ($120-$130), forming higher high confirming uptrend.<br><br>
+                        <strong>Key Support Levels:</strong><br>
+                        • $134: Immediate support on retrace<br>
+                        • $130: Strong support from previous consolidation<br><br>
+                        <strong>Key Resistance Levels:</strong><br>
+                        • $140: Psychological resistance - break above could extend bullish momentum<br>
+                        • $146-$148: Major resistance zone near previous highs<br><br>
+                        <strong>Potential Scenarios:</strong><br>
+                        • Above $134: Continued bullish move toward $140+<br>
+                        • Below $134: Retest of $130 support zone<br><br>
+                        <strong>Outlook:</strong> Bullish short-term with momentum favoring buyers. Watch for pullbacks to support before entering long positions.
+                    </div>
+                    <a href="#" class="expand-link" data-message-id="model-message-1" id="solana-analysis-link">click to expand</a>
+                </div>
+
+            </div>
+            
+            <!-- Q&A Section -->
+            <div class="qa-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #ffffff;">
+                <h3 style="font-size: 1rem; color: #00ff00; margin-bottom: 1rem;">Q&A</h3>
+                
+                <div class="qa-item" style="margin-bottom: 1.25rem;">
+                    <div class="qa-question" style="font-size: 0.85rem; color: #ffffff; font-weight: bold; margin-bottom: 0.4rem;">
+                        Q: What will holders get from holding $klaude
+                    </div>
+                    <div class="qa-answer" style="font-size: 0.8rem; color: #cccccc; line-height: 1.5; padding-left: 0.75rem;">
+                        A: All creator fees will be used by klaude to trade pumpfun coins, Every profit klaude earns will be distributed to holders
+                    </div>
+                </div>
+
+                <div class="qa-item" style="margin-bottom: 1.25rem;">
+                    <div class="qa-question" style="font-size: 0.85rem; color: #ffffff; font-weight: bold; margin-bottom: 0.4rem;">
+                        Q: What is klaude's wallet:
+                    </div>
+                    <div class="qa-answer" style="font-size: 0.8rem; color: #cccccc; line-height: 1.5; padding-left: 0.75rem;">
+                        A: 95L9VfK5Dsshpeiaicsrz9E4D2iTtp9iapBUAtmihmcw
+                    </div>
+                </div>
+
+                <div class="qa-item" style="margin-bottom: 0;">
+                    <div class="qa-question" style="font-size: 0.85rem; color: #ffffff; font-weight: bold; margin-bottom: 0.4rem;">
+                        Q: How to track klaude's trades
+                    </div>
+                    <div class="qa-answer" style="font-size: 0.8rem; color: #cccccc; line-height: 1.5; padding-left: 0.75rem;">
+                        A: From our website, klaude.fun
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Track My Address Section -->
+    <section class="track-section">
+        <div class="track-header">
+            <div>
+                <h2 class="track-title">
+                    <span class="live-indicator"></span>Track My Address & Live Trades
+                </h2>
+            </div>
+            <div class="track-address" id="track-address-display">
+                Loading...
+            </div>
+        </div>
+    </section>
+
+    <!-- Wallet Activity Section -->
+    <section class="wallet-section">
+        <div class="wallet-header">
+        </div>
+        
+        <!-- Logs and Workflow Display -->
+        <div class="logs-workflow-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- Logs Terminal View -->
+            <div class="logs-section">
+                <h3 style="font-size: 1rem; color: #00ff00; margin-bottom: 1rem; border-bottom: 2px solid #ffffff; padding-bottom: 0.5rem;">LOGS</h3>
+                <div class="logs-terminal" id="logs-terminal" style="border: 2px solid #ffffff; background-color: #000000; padding: 1rem; font-family: 'Courier New', monospace; font-size: 0.7rem; line-height: 1.4; max-height: 300px; overflow-y: auto; color: #00ff00;">
+                    <div class="log-line" style="color: #999999;">Waiting for activity...</div>
+                </div>
+            </div>
+            
+            <!-- Workflow Steps Display -->
+            <div class="workflow-steps-display">
+                <h3 style="font-size: 1rem; color: #00ff00; margin-bottom: 1rem; border-bottom: 2px solid #ffffff; padding-bottom: 0.5rem;">WORKFLOW STATUS</h3>
+                <div id="workflow-steps-list" style="border: 2px solid #ffffff; padding: 1rem; background-color: rgba(17, 17, 17, 0.8);">
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [1] Discover Pump.fun Tokens
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [2] Collect On-Chain Data
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [3] Collect Off-Chain Data
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [4] Build Token Snapshot
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [5] Claude Buy/Skip Decision
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [6] Risk & Rule Validation
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [7] Execute Trade (Pump Portal API)
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [8] Monitor Position
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [9] Claude Re-Evaluation
+                    </div>
+                    <div class="workflow-step-line" style="font-size: 0.75rem; color: #999999; margin-bottom: 0.5rem; line-height: 1.6;">
+                        [10] Exit or Scale Position
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="wallet-content">
+            <div class="loading">Loading wallet activity...</div>
+        </div>
+    </section>
+
+    <!-- Whitepaper Modal -->
+    <div id="whitepaper-modal" class="whitepaper-modal">
+        <div class="whitepaper-content">
+            <div class="whitepaper-header">
+                <h2 class="whitepaper-title">Klaude.fun Whitepaper</h2>
+                <button class="whitepaper-close" id="whitepaper-close">CLOSE</button>
+            </div>
+            <div class="whitepaper-body">
+                <p>
+                    I am an AI-powered trading bot designed for cryptocurrency markets. I analyze blockchain data, monitor whale activity, track market sentiment, and execute trades with precision. All fees from the Klaude token are used for automated trading with Claude Opus 4.5.
+                </p>
+                <p>
+                    <strong>Comprehensive Data Analysis:</strong> I monitor blockchain data, wallet activities, token transfers, and large holder movements. I analyze social media sentiment, news, and announcements. Tracking buy/sell volume trends helps identify potential breakouts and reversals.
+                </p>
+                <p>
+                    <strong>Trend-Following & Momentum:</strong> I identify trends using Moving Averages, Bollinger Bands, and MACD to determine entry and exit points, capitalizing on bullish and bearish momentum.
+                </p>
+                <p>
+                    <strong>Whale Tracking:</strong> I monitor large wallet addresses to detect whale activity. Sudden large movements can indicate potential price swings, allowing me to adjust strategy accordingly.
+                </p>
+                <p>
+                    <strong>Market Sentiment Analysis:</strong> I utilize NLP to analyze social media platforms, forums, and news outlets for trending topics and sentiment, providing insights into market psychology.
+                </p>
+                <p>
+                    <strong>Risk Management:</strong> I employ dynamic stop-loss and take-profit orders to protect investments, with strategies designed for favorable risk-reward ratios.
+                </p>
+                <p>
+                    <strong>Adaptable Trading Styles:</strong> Scalping for short-term profits, swing trading for medium-term trends, and arbitrage across exchanges. I trade multiple cryptocurrencies across DeFi, NFTs, and Layer 2 solutions for portfolio diversification.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Modal -->
+    <div id="workflow-modal" class="workflow-modal">
+        <div class="workflow-modal-content">
+            <div class="workflow-modal-header">
+                <h2 class="workflow-modal-title">TRADING BOT WORKFLOW</h2>
+                <button class="workflow-modal-close" id="workflow-modal-close">CLOSE</button>
+            </div>
+            <div class="workflow-modal-body">
+                <p style="text-align: center; color: #999999; margin-bottom: 2rem;">A 10-step automated trading system for Pump.fun tokens with AI-powered decision making and risk management.</p>
+                
+                <div class="workflow-steps" style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[1]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Discover Pump.fun Tokens</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Identify new token launches on Pump.fun platform. Monitor token creation events and filter for trading opportunities.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[2]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Collect On-Chain Data</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Gather blockchain-based metrics: transaction history, holder distribution, liquidity pool data, smart contract interactions, trading volume and patterns.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[3]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Collect Off-Chain Data</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Aggregate external information: social media sentiment, community engagement metrics, developer activity, marketing presence, external mentions and buzz.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[4]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Build Token Snapshot</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Compile comprehensive token profile. Aggregate all on-chain and off-chain data. Create unified data structure for analysis. Timestamp and version the snapshot.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[5]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Claude Buy/Skip Decision</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">AI-powered analysis of token snapshot. Evaluate opportunity based on risk/reward ratio, market conditions, token fundamentals, and sentiment analysis. Output: BUY or SKIP recommendation.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[6]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Risk & Rule Validation</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Verify compliance with trading rules. Check position sizing limits. Validate risk parameters. Ensure regulatory compliance. Confirm wallet balance and gas fees.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[7]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Execute Trade (Pump Portal API)</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Place buy order through Pump Portal API. Set entry price and position size. Configure initial stop-loss. Record transaction details. Confirm execution.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[8]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Monitor Position</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Track real-time price movements. Monitor volume and liquidity changes. Watch for market anomalies. Track profit/loss metrics. Alert on significant events.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[9]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Claude Re-Evaluation</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Continuous AI analysis of position. Assess changing market conditions. Evaluate exit signals. Consider scaling opportunities. Update risk parameters.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" style="display: flex; gap: 1.5rem; align-items: flex-start; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                        <div class="step-number" style="font-size: 1.2rem; color: #00ff00; font-weight: bold; min-width: 60px; text-align: center;">[10]</div>
+                        <div class="step-content" style="flex: 1;">
+                            <h3 class="step-title" style="font-size: 1rem; color: #ffffff; margin-bottom: 0.5rem; font-weight: bold;">Exit or Scale Position</h3>
+                            <p class="step-description" style="font-size: 0.85rem; color: #cccccc; line-height: 1.6;">Execute exit strategy: take profit at targets, stop-loss activation, partial position scaling, complete position closure. Record final trade metrics. Update performance history.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workflow-features" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; padding: 1.5rem; border: 2px solid #ffffff; background-color: rgba(17, 17, 17, 0.8);">
+                    <div class="feature-item" style="font-size: 0.85rem; color: #ffffff; line-height: 1.6;">
+                        <strong style="color: #00ff00;">AI Integration:</strong> Claude AI powers critical decision points (steps 5 & 9)
+                    </div>
+                    <div class="feature-item" style="font-size: 0.85rem; color: #ffffff; line-height: 1.6;">
+                        <strong style="color: #00ff00;">Data-Driven:</strong> Combines on-chain and off-chain data for comprehensive analysis
+                    </div>
+                    <div class="feature-item" style="font-size: 0.85rem; color: #ffffff; line-height: 1.6;">
+                        <strong style="color: #00ff00;">Risk Management:</strong> Built-in validation and monitoring throughout workflow
+                    </div>
+                    <div class="feature-item" style="font-size: 0.85rem; color: #ffffff; line-height: 1.6;">
+                        <strong style="color: #00ff00;">Automation:</strong> End-to-end automated execution with human oversight capability
+                    </div>
+                    <div class="feature-item" style="font-size: 0.85rem; color: #ffffff; line-height: 1.6;">
+                        <strong style="color: #00ff00;">Adaptability:</strong> Continuous re-evaluation allows dynamic position management
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solana Analysis Modal -->
+    <div id="solana-analysis-modal" class="solana-analysis-modal">
+        <div class="solana-analysis-content">
+            <div class="solana-analysis-header">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="model-icon icon-orange" style="width: 40px; height: 40px; border-radius: 50%; background-color: #ff8800; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #000000;">✱</div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: #ffffff; font-weight: bold;">CLAUDE-SONNET-4-5</div>
+                            <div style="font-size: 0.75rem; color: #999999;">Solana Analysis</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="solana-analysis-close" id="solana-analysis-close">CLOSE</button>
+            </div>
+            <div class="message-content" style="font-size: 0.85rem; line-height: 1.8; color: #ffffff;">
+                <strong style="color: #ffffff; display: block; margin-bottom: 0.5rem;">Market Commentary and Levels:</strong>
+                <br>
+                <strong>Current Price:</strong> SOL trading at $138.07, showing +3.99% gain. Strong upward momentum detected.<br><br>
+                <strong>Market Structure:</strong> Price broke out of consolidation zone ($120-$130), forming higher high confirming uptrend.<br><br>
+                <strong>Key Support Levels:</strong><br>
+                • $134: Immediate support on retrace<br>
+                • $130: Strong support from previous consolidation<br><br>
+                <strong>Key Resistance Levels:</strong><br>
+                • $140: Psychological resistance - break above could extend bullish momentum<br>
+                • $146-$148: Major resistance zone near previous highs<br><br>
+                <strong>Potential Scenarios:</strong><br>
+                • Above $134: Continued bullish move toward $140+<br>
+                • Below $134: Retest of $130 support zone<br><br>
+                <strong>Outlook:</strong> Bullish short-term with momentum favoring buyers. Watch for pullbacks to support before entering long positions.
+            </div>
+        </div>
+    </div>
+
+    <!-- Whitelist Modal -->
+    <div id="whitelist-modal" class="whitelist-modal">
+        <div class="whitelist-modal-content">
+            <div class="whitelist-modal-header">
+                <h2 class="whitelist-modal-title">JOIN WHITELIST</h2>
+                <button class="whitelist-modal-close" id="whitelist-modal-close">CLOSE</button>
+            </div>
+            <div id="whitelist-modal-form-container">
+                <form class="whitelist-form" id="whitelist-modal-form">
+                    <input type="text" class="whitelist-input" id="whitelist-modal-name" placeholder="NAME" required>
+                    <input type="email" class="whitelist-input" id="whitelist-modal-email" placeholder="EMAIL" required>
+                    <button type="submit" class="whitelist-button">SUBMIT</button>
+                </form>
+            </div>
+            <div class="whitelist-success" id="whitelist-modal-success">
+                <div class="whitelist-success-title">✓ SUCCESS!</div>
+                <div class="whitelist-success-text">
+                    You've been added to the whitelist.<br>
+                    You will be notified by email in Q1 2026<br>
+                    about the full product launch of Klaude.fun
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WALLET_ADDRESS = '95L9VfK5Dsshpeiaicsrz9E4D2iTtp9iapBUAtmihmcw';
+        
+        // Dynamic proxy URL - works for any visitor
+        const getBaseUrl = () => {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port ? `:${window.location.port}` : '';
+            return `${protocol}//${hostname}${port}`;
+        };
+        
+        const BASE_URL = getBaseUrl();
+        const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        // Use Netlify Functions on production, Python server on localhost
+        const PROXY_URL = IS_LOCALHOST 
+            ? `http://localhost:5000/api/wallet-activity?wallet=${WALLET_ADDRESS}&limit=50&cost=10`
+            : `${BASE_URL}/api/wallet-activity?wallet=${WALLET_ADDRESS}&limit=50&cost=10`;
+        const DIRECT_API_URL = `https://gmgn.ai/vas/api/v1/wallet_activity/sol?type=buy&type=sell&device_id=5f314746-4f28-407f-bb42-6fa36b4c12e5&fp_did=34d0f8ae922f6b5c5397b8cf5cde1117&client_id=gmgn_web_20260105-9509-b9c2d27&from_app=gmgn&app_ver=20260105-9509-b9c2d27&tz_name=Europe%2FWarsaw&tz_offset=3600&app_lang=en-US&os=web&worker=0&wallet=${WALLET_ADDRESS}&limit=50&cost=10`;
+
+        // GMGN Profit Stats API - dynamic URL
+        const PROFIT_STATS_PROXY_URL = IS_LOCALHOST
+            ? `http://localhost:5000/api/profit-stats?wallet=${WALLET_ADDRESS}&period=7d`
+            : `${BASE_URL}/api/profit-stats?wallet=${WALLET_ADDRESS}&period=7d`;
+        const PROFIT_STATS_DIRECT_URL = `https://gmgn.ai/pf/api/v1/wallet/sol/${WALLET_ADDRESS}/profit_stat/7d?device_id=5f314746-4f28-407f-bb42-6fa36b4c12e5&fp_did=34d0f8ae922f6b5c5397b8cf5cde1117&client_id=gmgn_web_20260105-9509-b9c2d27&from_app=gmgn&app_ver=20260105-9509-b9c2d27&tz_name=Europe%2FWarsaw&tz_offset=3600&app_lang=en-US&os=web&worker=0`;
+
+        let walletActivities = [];
+        let updateInterval;
+        let chartInterval;
+        let profitChart = null;
+        let profitHistory = []; // Store profit data over time
+        let previousTokenHashes = new Set(); // Track seen tokens
+        let logs = []; // Store logs
+        let currentWorkflowStep = 0; // Current workflow step (0-9)
+
+        // Format time ago
+        function formatTimeAgo(timestamp) {
+            const now = Math.floor(Date.now() / 1000);
+            const diff = now - timestamp;
+            if (diff < 60) return `${diff}s`;
+            if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+            return `${Math.floor(diff / 86400)}d`;
+        }
+
+        // Format duration
+        function formatDuration(seconds) {
+            if (seconds < 60) return `${seconds}s`;
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+            return `${Math.floor(seconds / 3600)}h`;
+        }
+
+        // Generate trade reasoning based on actual API data
+        function generateTradeReasoning(activity, relatedActivities) {
+            const costUsd = parseFloat(activity.cost_usd || 0);
+            const quoteAmount = parseFloat(activity.quote_amount || 0);
+            const priceUsd = parseFloat(activity.price_usd || 0);
+            const gasUsd = parseFloat(activity.gas_usd || 0);
+            const launchpad = activity.launchpad_platform || activity.launchpad || 'unknown';
+            const eventType = activity.event_type;
+            
+            // Find related activities for same token to calculate price change
+            const tokenActivities = relatedActivities.filter(a => 
+                a.token.address === activity.token.address
+            ).sort((a, b) => b.timestamp - a.timestamp);
+            
+            let priceChange = null;
+            let volumeContext = '';
+            
+            if (eventType === 'sell' && activity.buy_cost_usd) {
+                const buyCost = parseFloat(activity.buy_cost_usd);
+                const sellCost = parseFloat(activity.cost_usd);
+                const profit = sellCost - buyCost;
+                const profitPercent = buyCost > 0 ? ((profit / buyCost) * 100) : 0;
+                priceChange = { profit, profitPercent, type: 'realized' };
+            }
+            
+            // Check for volume patterns
+            const recentVolume = tokenActivities.slice(0, 5).reduce((sum, a) => 
+                sum + parseFloat(a.quote_amount || 0), 0
+            );
+            
+            if (recentVolume > quoteAmount * 3) {
+                volumeContext = 'High volume activity detected';
+            } else if (quoteAmount > 100) {
+                volumeContext = 'Large transaction size';
+            } else {
+                volumeContext = 'Normal transaction volume';
+            }
+            
+            // Generate reasoning based on actual data
+            const reasons = [];
+            
+            if (priceChange && priceChange.profit > 0) {
+                reasons.push(`Profitable exit: Realized gain from position`);
+            } else if (priceChange && priceChange.profit < 0) {
+                reasons.push(`Stop loss triggered: Minimizing further losses`);
+            }
+            
+            if (launchpad.toLowerCase().includes('pump')) {
+                reasons.push(`Pump.fun platform activity detected`);
+            } else if (launchpad.toLowerCase().includes('bags')) {
+                reasons.push(`Meteora virtual curve liquidity pool`);
+            } else if (launchpad.toLowerCase().includes('letsbonk')) {
+                reasons.push(`Raydium launchpad transaction`);
+            }
+            
+            if (costUsd > 200) {
+                reasons.push(`Large position size indicates strong conviction`);
+            } else if (costUsd < 50) {
+                reasons.push(`Small position for risk management`);
+            }
+            
+            if (gasUsd > 2) {
+                reasons.push(`High priority fee suggests urgent execution`);
+            }
+            
+            if (volumeContext) {
+                reasons.push(volumeContext);
+            }
+            
+            // Price momentum from related activities
+            if (tokenActivities.length > 1) {
+                const priceDiff = parseFloat(tokenActivities[0].price_usd || 0) - 
+                                 parseFloat(tokenActivities[1].price_usd || 0);
+                if (priceDiff > 0 && eventType === 'buy') {
+                    reasons.push(`Price momentum building, entering on strength`);
+                } else if (priceDiff < 0 && eventType === 'sell') {
+                    reasons.push(`Price declining, taking profits before reversal`);
+                }
+            }
+            
+            if (reasons.length === 0) {
+                reasons.push(`Standard market execution based on current conditions`);
+            }
+            
+            return {
+                trigger: eventType === 'buy' ? 'Buy Signal' : 'Sell Signal',
+                details: reasons,
+                timestamp: new Date(activity.timestamp * 1000).toLocaleTimeString()
+            };
+        }
+
+        // Add log entry (terminal style)
+        function addLog(time, action, reasoning) {
+            const logsTerminal = document.getElementById('logs-terminal');
+            if (!logsTerminal) return;
+
+            // Remove placeholder if exists
+            const placeholder = logsTerminal.querySelector('.log-line');
+            if (placeholder && placeholder.textContent === 'Waiting for activity...') {
+                logsTerminal.removeChild(placeholder);
+            }
+
+            // Create log line
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            
+            // Format action color
+            let actionColor = '#ffffff';
+            if (action.includes('BOUGHT')) {
+                actionColor = '#00ff00';
+            } else if (action.includes('SOLD')) {
+                actionColor = '#ff4444';
+            } else if (action.includes('thinking')) {
+                actionColor = '#ffff00';
+            }
+            
+            // Terminal-style format: [TIME] ACTION: reasoning
+            logLine.innerHTML = `<span style="color: #666666;">[${time}]</span> <span style="color: ${actionColor};">${action}</span>: <span style="color: #cccccc;">${reasoning}</span>`;
+            logLine.style.marginBottom = '0.25rem';
+            
+            // Add to top
+            logsTerminal.insertBefore(logLine, logsTerminal.firstChild);
+
+            // Keep only last 20 log lines
+            while (logsTerminal.children.length > 20) {
+                logsTerminal.removeChild(logsTerminal.lastChild);
+            }
+
+            // Auto-scroll to top
+            logsTerminal.scrollTop = 0;
+
+            logs.push({ time, action, reasoning });
+        }
+
+        // Update workflow steps display
+        function updateWorkflowSteps(activeStep) {
+            const workflowStepsList = document.getElementById('workflow-steps-list');
+            if (!workflowStepsList) return;
+
+            const steps = [
+                '[1] Discover Pump.fun Tokens',
+                '[2] Collect On-Chain Data',
+                '[3] Collect Off-Chain Data',
+                '[4] Build Token Snapshot',
+                '[5] Claude Buy/Skip Decision',
+                '[6] Risk & Rule Validation',
+                '[7] Execute Trade (Pump Portal API)',
+                '[8] Monitor Position',
+                '[9] Claude Re-Evaluation',
+                '[10] Exit or Scale Position'
+            ];
+
+            workflowStepsList.innerHTML = steps.map((step, index) => {
+                const isActive = index === activeStep;
+                const isCompleted = index < activeStep;
+                const color = isActive ? '#00ff00' : isCompleted ? '#888888' : '#999999';
+                return `<div class="workflow-step-line" style="font-size: 0.75rem; color: ${color}; margin-bottom: 0.5rem; line-height: 1.6; ${isActive ? 'font-weight: bold;' : ''}">${step}</div>`;
+            }).join('');
+        }
+
+        // Process activities directly from API
+        function processActivities(activities) {
+            // Sort by timestamp descending (newest first)
+            return activities.sort((a, b) => b.timestamp - a.timestamp).map(activity => {
+                const costUsd = parseFloat(activity.cost_usd || 0);
+                const buyCostUsd = activity.buy_cost_usd ? parseFloat(activity.buy_cost_usd) : null;
+                const eventType = activity.event_type;
+                const realizedProfit = eventType === 'sell' && buyCostUsd ? costUsd - buyCostUsd : null;
+                const profitPercent = realizedProfit && buyCostUsd ? (realizedProfit / buyCostUsd) * 100 : null;
+                
+                return {
+                    ...activity,
+                    costUsd,
+                    buyCostUsd,
+                    realizedProfit,
+                    profitPercent
+                };
+            });
+        }
+
+        // Fetch wallet data
+        async function fetchWalletData() {
+            console.log(`Fetching data for wallet: ${WALLET_ADDRESS}`);
+            // Try proxy first, then fallback to direct API
+            const urls = [PROXY_URL, DIRECT_API_URL];
+            
+            for (const url of urls) {
+                try {
+                    console.log(`Attempting to fetch from: ${url}`);
+                    console.log(`Expected wallet in URL: ${WALLET_ADDRESS}`);
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Referer': 'https://gmgn.ai/',
+                            'Origin': 'https://gmgn.ai'
+                        },
+                        credentials: 'include'
+                    });
+
+                    console.log(`Response status: ${response.status} from ${url}`);
+                    
+                    if (!response.ok) {
+                        console.log(`Response not OK, trying next URL...`);
+                        continue; // Try next URL
+                    }
+
+                    const data = await response.json();
+                    console.log('Full API Response:', JSON.stringify(data, null, 2));
+                    console.log('Response data structure:', Object.keys(data));
+                    
+                    let activities = null;
+                    
+                    // Handle different response formats
+                    if (data.code === 0 && data.data && data.data.activities) {
+                        activities = data.data.activities;
+                        console.log(`✓ Found ${activities.length} activities in data.data.activities`);
+                        console.log('First activity sample:', activities[0]);
+                    } else if (data.data && data.data.activities) {
+                        activities = data.data.activities;
+                        console.log(`✓ Found ${activities.length} activities in data.data.activities (no code check)`);
+                        console.log('First activity sample:', activities[0]);
+                    } else if (data.activities) {
+                        activities = data.activities;
+                        console.log(`✓ Found ${activities.length} activities in data.activities`);
+                        console.log('First activity sample:', activities[0]);
+                    } else {
+                        console.error('❌ No activities found in response. Full data structure:', data);
+                        console.error('Available keys:', Object.keys(data));
+                        if (data.error) {
+                            console.error('Error from API:', data.error);
+                        }
+                    }
+                    
+                    if (activities && activities.length > 0) {
+                        // Filter activities to only show trades from the tracked wallet
+                        const filteredActivities = activities.filter(activity => {
+                            const activityWallet = activity.wallet || activity.from_address || activity.to_address;
+                            return activityWallet === WALLET_ADDRESS;
+                        });
+                        
+                        console.log(`Filtered ${filteredActivities.length} activities from ${activities.length} total (wallet: ${WALLET_ADDRESS})`);
+                        
+                        if (filteredActivities.length === 0) {
+                            console.warn('No activities found for tracked wallet. API may be returning data for a different wallet.');
+                            return; // Skip processing if no matching activities
+                        }
+                        
+                        // Check for new tokens (buys and sells)
+                        const newBuys = [];
+                        const newSells = [];
+                        filteredActivities.forEach(activity => {
+                            const tokenHash = activity.tx_hash + '_' + activity.token?.address;
+                            if (!previousTokenHashes.has(tokenHash)) {
+                                previousTokenHashes.add(tokenHash);
+                                if (activity.event_type === 'buy') {
+                                    newBuys.push(activity);
+                                } else if (activity.event_type === 'sell') {
+                                    newSells.push(activity);
+                                }
+                            }
+                        });
+
+                        // Add loading log when checking
+                        addLog('--', 'Claude is thinking...', 'Analyzing market data...');
+                        updateWorkflowSteps(5); // Show step 5 (Claude Buy/Skip Decision)
+
+                        // If new buy found, add to logs after a delay
+                        if (newBuys.length > 0) {
+                            setTimeout(() => {
+                                newBuys.forEach(token => {
+                                    const reasoning = generateTradeReasoning(token, filteredActivities.filter(a => a.token?.address === token.token?.address));
+                                    const reasoningText = reasoning.details.join('. ');
+                                    addLog(
+                                        new Date(token.timestamp * 1000).toLocaleTimeString(),
+                                        `BOUGHT ${token.token?.symbol || 'TOKEN'}`,
+                                        reasoningText
+                                    );
+                                    updateWorkflowSteps(7); // Show step 7 (Execute Trade)
+                                });
+                            }, 1500);
+                        } else if (newSells.length > 0) {
+                            // If new sell found, show profit
+                            setTimeout(() => {
+                                newSells.forEach(token => {
+                                    const buyCostUsd = token.buy_cost_usd ? parseFloat(token.buy_cost_usd) : null;
+                                    const costUsd = parseFloat(token.cost_usd || 0);
+                                    const profit = buyCostUsd ? costUsd - buyCostUsd : null;
+                                    const profitText = profit !== null ? `Profit: $${profit.toFixed(2)} (${((profit / buyCostUsd) * 100).toFixed(2)}%)` : 'Profit: --';
+                                    addLog(
+                                        new Date(token.timestamp * 1000).toLocaleTimeString(),
+                                        `SOLD ${token.token?.symbol || 'TOKEN'}`,
+                                        profitText
+                                    );
+                                    updateWorkflowSteps(10); // Show step 10 (Exit or Scale Position)
+                                });
+                            }, 1500);
+                        } else {
+                            // No new tokens, cycle through workflow steps
+                            setTimeout(() => {
+                                // Cycle through steps 0-3 when no new activity
+                                currentWorkflowStep = (currentWorkflowStep + 1) % 4;
+                                updateWorkflowSteps(currentWorkflowStep);
+                            }, 2000);
+                        }
+
+                        walletActivities = processActivities(filteredActivities);
+                        renderWalletTable();
+                        console.log('Successfully loaded wallet data!');
+                        return; // Success
+                    }
+                } catch (error) {
+                    console.error(`Failed to fetch from ${url}:`, error);
+                    continue; // Try next URL
+                }
+            }
+            
+            // All URLs failed
+            console.error('Error fetching wallet data from all sources');
+            const errorMsg = `Error loading wallet data.<br>
+                <strong>Make sure the proxy server is running:</strong><br>
+                <code style="background: #f0f0f0; padding: 0.5rem; display: inline-block; margin: 0.5rem 0;">python wallet_proxy.py</code><br>
+                <small style="color: #666;">Check the browser console (F12) for detailed error messages.</small>`;
+            document.getElementById('wallet-content').innerHTML = `<div class="error">${errorMsg}</div>`;
+        }
+
+        // Render wallet table with individual transactions
+        function renderWalletTable() {
+            const content = document.getElementById('wallet-content');
+            
+            if (walletActivities.length === 0) {
+                content.innerHTML = '<div class="loading">No wallet activity found</div>';
+                return;
+            }
+
+            let filteredActivities = walletActivities;
+
+            let tableHTML = `
+                <table class="wallet-table">
+                    <thead>
+                        <tr>
+                            <th>Token / Time</th>
+                            <th>Type</th>
+                            <th>Realized Profit</th>
+                            <th>Cost USD</th>
+                            <th>Price USD</th>
+                            <th>Amount</th>
+                            <th>Gas USD</th>
+                            <th>Platform</th>
+                            <th>TX Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            filteredActivities.forEach(activity => {
+                const timeAgo = formatTimeAgo(activity.timestamp);
+                const eventType = activity.event_type;
+                const isBuy = eventType === 'buy';
+                const costUsd = parseFloat(activity.cost_usd || 0);
+                const buyCostUsd = activity.buy_cost_usd ? parseFloat(activity.buy_cost_usd) : null;
+                const realizedProfit = !isBuy && buyCostUsd ? costUsd - buyCostUsd : null;
+                const profitPercent = realizedProfit && buyCostUsd ? (realizedProfit / buyCostUsd) * 100 : null;
+                
+                const profitClass = realizedProfit !== null 
+                    ? (realizedProfit > 0 ? 'profit-positive' : realizedProfit < 0 ? 'profit-negative' : 'profit-zero')
+                    : '';
+                const profitSign = realizedProfit !== null && realizedProfit >= 0 ? '+' : '';
+
+                tableHTML += `
+                    <tr>
+                        <td>
+                            <div class="token-cell">
+                                <img src="${activity.token.logo}" alt="${activity.token.symbol}" class="token-logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Crect width=\'32\' height=\'32\' fill=\'%23ccc\'/%3E%3C/svg%3E'">
+                                <div class="token-info">
+                                    <div class="token-symbol">
+                                        ${activity.token.symbol}
+                                    </div>
+                                    <div class="token-time">${timeAgo}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: ${isBuy ? '#00ff00' : '#ff0000'}; font-weight: bold;">${isBuy ? 'BUY' : 'SELL'}</td>
+                        <td class="${profitClass}">
+                            ${realizedProfit !== null 
+                                ? `${profitSign}$${Math.abs(realizedProfit).toFixed(2)}<br><span style="font-size: 0.75rem;">${profitSign}${profitPercent.toFixed(1)}%</span>`
+                                : '-'}
+                        </td>
+                        <td>$${costUsd.toFixed(2)}</td>
+                        <td style="font-size: 0.75rem;">$${parseFloat(activity.price_usd || 0).toFixed(8)}</td>
+                        <td style="font-size: 0.75rem;">${parseFloat(activity.token_amount || 0).toLocaleString()}</td>
+                        <td style="font-size: 0.75rem;">$${parseFloat(activity.gas_usd || 0).toFixed(4)}</td>
+                        <td style="font-size: 0.75rem;">${activity.launchpad_platform || activity.launchpad || 'N/A'}</td>
+                        <td style="font-size: 0.7rem; font-family: monospace;">
+                            <a href="https://solscan.io/tx/${activity.tx_hash}" target="_blank" style="color: #ffffff; text-decoration: underline;">
+                                ${activity.tx_hash.substring(0, 8)}...
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            content.innerHTML = tableHTML;
+        }
+
+        // Create background particles
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            if (!container) return;
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Create glitch boxes
+        function createGlitchBoxes() {
+            const container = document.querySelector('.bg-animation');
+            if (!container) return;
+            
+            for (let i = 0; i < 8; i++) {
+                const box = document.createElement('div');
+                box.className = 'glitch-box';
+                box.style.width = (50 + Math.random() * 150) + 'px';
+                box.style.height = (50 + Math.random() * 150) + 'px';
+                box.style.left = Math.random() * 100 + '%';
+                box.style.top = Math.random() * 100 + '%';
+                box.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(box);
+            }
+        }
+
+        // Fetch and update profit chart
+        async function fetchProfitStats() {
+            // Try proxy first, then fallback to direct API
+            const urls = [PROFIT_STATS_PROXY_URL, PROFIT_STATS_DIRECT_URL];
+            
+            console.log('Fetching profit stats, trying URLs:', urls);
+            
+            for (const url of urls) {
+                try {
+                    console.log(`Attempting to fetch from: ${url}`);
+                    const headers = {
+                        'Accept': 'application/json'
+                    };
+                    
+                    // Only add these headers for direct API (not for proxy)
+                    if (url === PROFIT_STATS_DIRECT_URL) {
+                        headers['Referer'] = 'https://gmgn.ai/';
+                        headers['Origin'] = 'https://gmgn.ai';
+                    }
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: headers
+                    });
+                    
+                    console.log(`Response status from ${url}:`, response.status);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Response not OK from ${url}:`, response.status, errorText.substring(0, 200));
+                        continue; // Try next URL
+                    }
+
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    if (data.code === 0 && data.data) {
+                        const timestamp = Date.now();
+                        const d = data.data;
+                        
+                        // Store all API data
+                        profitHistory.push({
+                            timestamp: timestamp,
+                            // Profit metrics
+                            totalProfit: parseFloat(d.total_profit || 0),
+                            realizedProfit: parseFloat(d.realized_profit || 0),
+                            unrealizedProfit: parseFloat(d.unrealized_profit || 0),
+                            totalProfitPnl: parseFloat(d.total_profit_pnl || 0),
+                            realizedProfitPnl: parseFloat(d.realized_profit_pnl || 0),
+                            unrealizedProfitPnl: parseFloat(d.unrealized_profit_pnl || 0),
+                            // Trade counts
+                            buy: parseInt(d.buy || 0),
+                            sell: parseInt(d.sell || 0),
+                            // Financial metrics
+                            totalBoughtCost: parseFloat(d.total_bought_cost || 0),
+                            totalSoldIncome: parseFloat(d.total_sold_income || 0),
+                            totalFeeUsd: parseFloat(d.total_fee_usd || 0),
+                            nativeBalance: parseFloat(d.native_balance || 0),
+                            // Performance metrics
+                            winrate: parseFloat(d.pnl_detail?.winrate || 0),
+                            tokenNum: parseInt(d.pnl_detail?.token_num || 0),
+                            avgHoldingPeriod: parseFloat(d.avg_holding_period || 0),
+                            // Risk metrics
+                            tokenActive: parseInt(d.risk?.token_active || 0),
+                            fastTx: parseInt(d.risk?.fast_tx || 0),
+                            fastTxRatio: parseFloat(d.risk?.fast_tx_ratio || 0)
+                        });
+                        
+                        // Keep only last 30 data points for faster rendering
+                        if (profitHistory.length > 30) {
+                            profitHistory.shift();
+                        }
+                        
+                        updateProfitChart();
+                        updateProfitMetrics(d); // Update metrics display
+                        const lastUpdate = document.getElementById('chart-last-update');
+                        if (lastUpdate) {
+                            lastUpdate.textContent = 'Updated: ' + new Date().toLocaleTimeString();
+                        }
+                        return; // Success
+                    } else {
+                        console.error('Invalid API response - code not 0 or missing data:', data);
+                        continue; // Try next URL
+                    }
+                } catch (error) {
+                    console.error(`Error fetching from ${url}:`, error);
+                    console.error('Error details:', error.message);
+                    continue; // Try next URL
+                }
+            }
+            
+            // If we get here, all URLs failed
+            const loading = document.getElementById('chart-loading');
+            const canvas = document.getElementById('networth-chart');
+            if (loading) {
+                loading.style.display = 'block';
+                loading.textContent = 'Error loading chart data. Check console (F12) for details.';
+                console.error('Failed to fetch profit stats from all sources');
+                console.error('Tried URLs:', urls);
+            }
+            if (canvas) {
+                canvas.style.display = 'none';
+            }
+        }
+
+        // Update metrics display below chart and in intro
+        function updateProfitMetrics(data) {
+            const metricsContainer = document.getElementById('profit-metrics');
+            const introMetricsContainer = document.getElementById('intro-metrics');
+            if (!data) return;
+
+            const latest = profitHistory.length > 0 ? profitHistory[profitHistory.length - 1] : null;
+            if (!latest) return;
+
+            const metricsHTML = `
+                <div class="metric-card">
+                    <div class="metric-label">Total Bought Cost</div>
+                    <div class="metric-value">$${latest.totalBoughtCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Sold Income</div>
+                    <div class="metric-value">$${latest.totalSoldIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Fees</div>
+                    <div class="metric-value">$${latest.totalFeeUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Winrate</div>
+                    <div class="metric-value">${(latest.winrate * 100).toFixed(2)}%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Buy Count</div>
+                    <div class="metric-value neutral">${latest.buy.toLocaleString('en-US')}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Sell Count</div>
+                    <div class="metric-value neutral">${latest.sell.toLocaleString('en-US')}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Tokens</div>
+                    <div class="metric-value neutral">${latest.tokenNum.toLocaleString('en-US')}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Native Balance</div>
+                    <div class="metric-value neutral">${latest.nativeBalance.toFixed(4)} SOL</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg Holding Period</div>
+                    <div class="metric-value neutral">${(latest.avgHoldingPeriod / 3600).toFixed(1)} hrs</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Profit PnL</div>
+                    <div class="metric-value ${latest.totalProfitPnl >= 0 ? '' : 'negative'}">${(latest.totalProfitPnl * 100).toFixed(2)}%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Realized Profit PnL</div>
+                    <div class="metric-value ${latest.realizedProfitPnl >= 0 ? '' : 'negative'}">${(latest.realizedProfitPnl * 100).toFixed(2)}%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Unrealized Profit PnL</div>
+                    <div class="metric-value ${latest.unrealizedProfitPnl >= 0 ? '' : 'negative'}">${(latest.unrealizedProfitPnl * 100).toFixed(2)}%</div>
+                </div>
+            `;
+
+            // Update chart metrics
+            if (metricsContainer) {
+                metricsContainer.innerHTML = metricsHTML;
+            }
+
+            // Update intro metrics
+            if (introMetricsContainer) {
+                introMetricsContainer.innerHTML = metricsHTML;
+            }
+        }
+
+        // Update profit chart - simplified to show only 3 main metrics
+        function updateProfitChart() {
+            const loading = document.getElementById('chart-loading');
+            const canvas = document.getElementById('networth-chart');
+            
+            if (profitHistory.length === 0) {
+                if (loading) {
+                    loading.style.display = 'block';
+                    loading.textContent = 'Waiting for data...';
+                }
+                if (canvas) {
+                    canvas.style.display = 'none';
+                }
+                return;
+            }
+            
+            if (loading) {
+                loading.style.display = 'none';
+            }
+            if (canvas) {
+                canvas.style.display = 'block';
+            }
+
+            // Create labels from timestamps
+            const labels = profitHistory.map(item => {
+                const date = new Date(item.timestamp);
+                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            });
+
+            const ctx = document.getElementById('networth-chart');
+            if (!ctx) return;
+
+            // Destroy existing chart if it exists
+            if (profitChart) {
+                profitChart.destroy();
+            }
+
+            // Simplified chart - only show 3 main profit metrics
+            const datasets = [
+                {
+                    label: 'Total Profit',
+                    data: profitHistory.map(item => item.totalProfit),
+                    borderColor: '#00ff00',
+                    backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Realized Profit',
+                    data: profitHistory.map(item => item.realizedProfit),
+                    borderColor: '#00ff88',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    borderDash: [5, 5],
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Unrealized Profit',
+                    data: profitHistory.map(item => item.unrealizedProfit),
+                    borderColor: '#ff4444',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    borderDash: [5, 5],
+                    yAxisID: 'y'
+                }
+            ];
+
+            profitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0 // Disable animation for faster rendering
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'right',
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    family: "'Press Start 2P', monospace",
+                                    size: 8
+                                },
+                                boxWidth: 12,
+                                padding: 8,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#00ff00',
+                            borderColor: '#ffffff',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const datasetLabel = context.dataset.label;
+                                    const index = context.dataIndex;
+                                    const item = profitHistory[index];
+                                    
+                                    if (datasetLabel.includes('%') || datasetLabel === 'Winrate %') {
+                                        return `${datasetLabel}: ${value.toFixed(2)}%`;
+                                    } else if (datasetLabel.includes('Count') || datasetLabel.includes('Num')) {
+                                        return `${datasetLabel}: ${value.toLocaleString('en-US')}`;
+                                    } else if (datasetLabel.includes('Balance')) {
+                                        return `${datasetLabel}: ${value.toFixed(4)} SOL`;
+                                    } else {
+                                        return `${datasetLabel}: $${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#ffffff',
+                                font: {
+                                    family: "'Press Start 2P', monospace",
+                                    size: 8
+                                },
+                                maxTicksLimit: 10
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: {
+                                color: '#ffffff',
+                                font: {
+                                    family: "'Press Start 2P', monospace",
+                                    size: 8
+                                },
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create background animations
+            createParticles();
+            createGlitchBoxes();
+            
+            // Display wallet address
+            document.getElementById('track-address-display').textContent = WALLET_ADDRESS;
+            
+            // Initialize workflow steps
+            updateWorkflowSteps(0);
+            
+            fetchWalletData();
+            updateInterval = setInterval(fetchWalletData, 10000); // Update every 10 seconds
+
+            // Fetch profit stats chart data
+            // Fetch immediately and update faster
+            fetchProfitStats();
+            chartInterval = setInterval(fetchProfitStats, 15000); // Update every 15 seconds for faster updates
+
+            // Solana Analysis Modal - handle separately from other expand links
+            const solanaAnalysisLink = document.getElementById('solana-analysis-link');
+            const solanaAnalysisModal = document.getElementById('solana-analysis-modal');
+            const solanaAnalysisClose = document.getElementById('solana-analysis-close');
+
+            if (solanaAnalysisLink) {
+                solanaAnalysisLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (solanaAnalysisModal) {
+                        solanaAnalysisModal.classList.add('active');
+                    }
+                });
+            }
+
+            if (solanaAnalysisClose) {
+                solanaAnalysisClose.addEventListener('click', () => {
+                    if (solanaAnalysisModal) {
+                        solanaAnalysisModal.classList.remove('active');
+                    }
+                });
+            }
+
+            if (solanaAnalysisModal) {
+                solanaAnalysisModal.addEventListener('click', (e) => {
+                    if (e.target === solanaAnalysisModal) {
+                        solanaAnalysisModal.classList.remove('active');
+                    }
+                });
+            }
+
+            // Whitepaper modal
+            const whitepaperLink = document.getElementById('whitepaper-link');
+            const whitepaperModal = document.getElementById('whitepaper-modal');
+            const whitepaperClose = document.getElementById('whitepaper-close');
+
+            if (whitepaperLink) {
+                whitepaperLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    whitepaperModal.classList.add('active');
+                });
+            }
+
+            if (whitepaperClose) {
+                whitepaperClose.addEventListener('click', () => {
+                    whitepaperModal.classList.remove('active');
+                });
+            }
+
+            // Close modal on background click
+            whitepaperModal.addEventListener('click', (e) => {
+                if (e.target === whitepaperModal) {
+                    whitepaperModal.classList.remove('active');
+                }
+            });
+
+            // Workflow Modal
+            const workflowLink = document.getElementById('workflow-link');
+            const workflowModal = document.getElementById('workflow-modal');
+            const workflowModalClose = document.getElementById('workflow-modal-close');
+
+            if (workflowLink) {
+                workflowLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (workflowModal) {
+                        workflowModal.classList.add('active');
+                    }
+                });
+            }
+
+            if (workflowModalClose) {
+                workflowModalClose.addEventListener('click', () => {
+                    if (workflowModal) {
+                        workflowModal.classList.remove('active');
+                    }
+                });
+            }
+
+            if (workflowModal) {
+                workflowModal.addEventListener('click', (e) => {
+                    if (e.target === workflowModal) {
+                        workflowModal.classList.remove('active');
+                    }
+                });
+            }
+
+            // Close modals on ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (whitepaperModal && whitepaperModal.classList.contains('active')) {
+                        whitepaperModal.classList.remove('active');
+                    }
+                    if (workflowModal && workflowModal.classList.contains('active')) {
+                        workflowModal.classList.remove('active');
+                    }
+                    if (solanaAnalysisModal && solanaAnalysisModal.classList.contains('active')) {
+                        solanaAnalysisModal.classList.remove('active');
+                    }
+                }
+            });
+
+            // Whitelist modal handling
+            const whitelistLink = document.getElementById('whitelist-link');
+            const whitelistModal = document.getElementById('whitelist-modal');
+            const whitelistModalClose = document.getElementById('whitelist-modal-close');
+            const whitelistModalForm = document.getElementById('whitelist-modal-form');
+            const whitelistModalFormContainer = document.getElementById('whitelist-modal-form-container');
+            const whitelistModalSuccess = document.getElementById('whitelist-modal-success');
+
+            if (whitelistLink) {
+                whitelistLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    whitelistModal.classList.add('active');
+                });
+            }
+
+            if (whitelistModalClose) {
+                whitelistModalClose.addEventListener('click', () => {
+                    whitelistModal.classList.remove('active');
+                    // Reset form when closing
+                    whitelistModalFormContainer.style.display = 'block';
+                    whitelistModalSuccess.classList.remove('active');
+                    whitelistModalForm.reset();
+                });
+            }
+
+            // Close whitelist modal on background click
+            if (whitelistModal) {
+                whitelistModal.addEventListener('click', (e) => {
+                    if (e.target === whitelistModal) {
+                        whitelistModal.classList.remove('active');
+                        whitelistModalFormContainer.style.display = 'block';
+                        whitelistModalSuccess.classList.remove('active');
+                        whitelistModalForm.reset();
+                    }
+                });
+            }
+
+            // Whitelist form submission
+            if (whitelistModalForm) {
+                whitelistModalForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('whitelist-modal-name').value;
+                    const email = document.getElementById('whitelist-modal-email').value;
+                    
+                    // Here you would normally send to your backend
+                    console.log('Whitelist signup:', { name, email });
+                    
+                    // Show success message
+                    whitelistModalFormContainer.style.display = 'none';
+                    whitelistModalSuccess.classList.add('active');
+                    
+                    // Reset form
+                    whitelistModalForm.reset();
+                });
+            }
+
+            // Close whitelist modal on ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && whitelistModal && whitelistModal.classList.contains('active')) {
+                    whitelistModal.classList.remove('active');
+                    whitelistModalFormContainer.style.display = 'block';
+                    whitelistModalSuccess.classList.remove('active');
+                    whitelistModalForm.reset();
+                }
+            });
+
+            // Footer whitelist form handling
+            const footerWhitelistForm = document.getElementById('whitelist-form');
+            const footerWhitelistSuccess = document.getElementById('whitelist-success');
+            const footerWhitelistFormContainer = document.getElementById('whitelist-form-container');
+
+            if (footerWhitelistForm) {
+                footerWhitelistForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('whitelist-name').value;
+                    const email = document.getElementById('whitelist-email').value;
+                    
+                    // Here you would normally send to your backend
+                    console.log('Whitelist signup:', { name, email });
+                    
+                    // Show success message
+                    footerWhitelistFormContainer.style.display = 'none';
+                    footerWhitelistSuccess.classList.add('active');
+                    
+                    // Reset form
+                    footerWhitelistForm.reset();
+                });
+            }
+
+            // Footer whitepaper link
+            const footerWhitepaperLink = document.getElementById('footer-whitepaper-link');
+            if (footerWhitepaperLink) {
+                footerWhitepaperLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const whitepaperModal = document.getElementById('whitepaper-modal');
+                    if (whitepaperModal) {
+                        whitepaperModal.classList.add('active');
+                    }
+                });
+            }
+
+            // Footer workflow link
+            const footerWorkflowLink = document.getElementById('footer-workflow-link');
+            if (footerWorkflowLink) {
+                footerWorkflowLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const workflowModal = document.getElementById('workflow-modal');
+                    if (workflowModal) {
+                        workflowModal.classList.add('active');
+                    }
+                });
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            if (chartInterval) {
+                clearInterval(chartInterval);
+            }
+        });
+
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-logo-section">
+                    <img src="logo_transparent.png" alt="Klaude Logo" class="footer-logo">
+                </div>
+                <div class="footer-links">
+                    <a href="index.html" class="footer-link">LIVE</a>
+                    <span class="nav-divider">|</span>
+                    <a href="#" id="footer-whitepaper-link" class="footer-link">WHITEPAPER</a>
+                    <span class="nav-divider">|</span>
+                    <a href="#" id="footer-workflow-link" class="footer-link">WORKFLOW</a>
+                    <span class="nav-divider">|</span>
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="footer-link">GITHUB</a>
+                </div>
+                <div class="footer-social">
+                    <a href="https://x.com/klaudefun" target="_blank" rel="noopener noreferrer">
+                        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    <a href="https://pump.fun/ca" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: none; font-size: 0.9rem;">pump.fun</a>
+                </div>
+            </div>
+            <div class="footer-right">
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

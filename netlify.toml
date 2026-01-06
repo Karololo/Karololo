@@ -1,0 +1,17 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/wallet-activity"
+  to = "/.netlify/functions/wallet-activity"
+  status = 200
+
+[[redirects]]
+  from = "/api/profit-stats"
+  to = "/.netlify/functions/profit-stats"
+  status = 200
+
